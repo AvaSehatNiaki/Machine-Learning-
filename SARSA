@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov  7 13:58:09 2018
+
+@author: ava
+"""
+
+import random
+import numpy as np
+
+reward = np.array([[0, -1, 0, -10],
+                   [0, -1, -1, -1],
+                   [0, -10, -10, -1],
+                   [0, 100, -1, 0],
+                   
+                   [-1, -1, 0, -1],
+                   [-10, -1, -1, -10],
+                   [-1, -1, -1, 100],
+                   [-1, -1, -1, 0],
+                   
+                   [-1, -1, 0, -1],
+                   [-1, -1, -1, -1],
+                   [-10, -1, -1, -1],
+                   [100, -1, -1, 0],
+                   
+                   [-1, 0, 0, -1],
+                   [-1, 0, -1, -1],
+                   [-1, 0, -1, -1],
+                   [-1, 0, -1, 0]])
+
+n_s = np.array([[-1,4,-1,1],
+               [-1,5,0,2],
+               [-1,6,1,3],
+               [-1,7,2,-1],
+                
+               [0,8,-1,5],
+               [1,9,4,6],
+               [2,10,5,7],
+               [3,11,6,-1],
+                
+               [4,12,-1,9],
+               [5,13,8,10],
+               [6,14,9,11],
+               [7,15,10,-1],
+                
+               [8,-1,-1,13],
+               [9,-1,12,14],
+               [10,-1,13,15],
+               [11,-1,14,-1]])
+
+action = np.array([[1,3],
+                  [1, 2, 3],
+                  [1, 2, 3],
+                  [1, 2],
+                   
+                  [0,1,3],
+                   [0,1,2,3],
+                   [0,1,2,3],
+                   [0,1,2],
+                   
+                   [0,1,3],
+                   [0,1,2,3],
+                   [0,1,2,3],
+                   [0,1,2],
+                   
+                   [0,3],
+                   [0,2,3],
+                   [0,2,3],
+                   [0,2]])
+
+
+Q = np.zeros((16,4))
+E = 0.3
+Gamma = 0.7
+lrA = 0.7
+n_state = 0
+episode = 1
+Path = []
+for _ in range(10):
+    'print(E)'
+    re = 0
+    i_state = 0
+    Path = []
+    i = random.random()
+    if(i>E):
+        Max_Re = [-9, -9, -9, -9]
+        for M in action[i_state]:
+            Max_Re[M] = (Q[n_state][M])
+        act = np.argmax(Max_Re)
+    else:
+        act = random.choice(action[i_state])
+    while(i_state != 7):
+        n_state = n_s[i_state][act]
+        i = random.random()
+        if(i>E):
+            Max_Re = [-9, -9, -9, -9]
+            for M in action[n_state]:
+                Max_Re[M] = (Q[n_state][M])
+            n_act = np.argmax(Max_Re)
+        else:
+            n_act = random.choice(action[n_state])
+        're = re + reward[i_state][act] + Gamma*Q[n_state][n_act] - Q[i_state][act]'
+        Q[i_state][act] = Q[i_state][act] + lrA*(reward[i_state][act] + Gamma*Q[n_state][n_act] - Q[i_state][act])
+        Path.append(i_state)
+        i_state = n_state
+        act = n_act
+    Path.append(i_state)
+    'print("Episode ",episode," Reward ", re)'
+    episode = episode + 1
+    if E>0:
+        E -= 0.03
+print(Path)
+'print("The Final Q Matrix is: \n", np.divide(Q,np.amax(Q)))'
